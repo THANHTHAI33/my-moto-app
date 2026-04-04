@@ -12,7 +12,7 @@ const IconDroplets = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" he
 const IconMapPin = () => <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>;
 
 // --- HƯỚNG DẪN KẾT NỐI GOOGLE SHEETS ---
-const GOOGLE_SHEET_API_URL = ""; 
+const GOOGLE_SHEET_API_URL = "https://docs.google.com/spreadsheets/d/1yff0ze6QS-58A5pHouJCtU2Uu9wl8hcuLHBwBnXde_0/edit?gid=0#gid=0"; 
 
 const ACTIVITY_TYPES = {
   fuel: { label: 'Đổ xăng', icon: IconFuel, color: 'text-blue-500', bgColor: 'bg-blue-100' },
