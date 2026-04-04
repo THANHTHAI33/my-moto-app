@@ -11,42 +11,20 @@ const IconBike = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height
 const IconDroplets = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 16.3c2.2 0 4-1.8 4-4 0-3.3-4-6.3-4-6.3s-4 3-4 6.3c0 2.2 1.8 4 4 4z"/><path d="M17 18.5c1.7 0 3-1.3 3-3 0-2.5-3-4.8-3-4.8s-3 2.3-3 4.8c0 1.7 1.3 3 3 3z"/></svg>;
 const IconMapPin = () => <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>;
 
-const FUEL_TYPES = ["RON 95-V", "RON 95-III", "E5 RON 92", "RON 97"];
 // --- HƯỚNG DẪN KẾT NỐI GOOGLE SHEETS ---
 const GOOGLE_SHEET_API_URL = "https://docs.google.com/spreadsheets/d/1yff0ze6QS-58A5pHouJCtU2Uu9wl8hcuLHBwBnXde_0/edit?gid=0#gid=0"; 
-// HIGHLIGHT: Hàm định dạng số có dấu chấm hàng ngàn khi gõ
 const formatNum = (val) => {
   if (!val && val !== 0) return "";
   const num = val.toString().replace(/\D/g, ""); // Chỉ giữ lại số
   return num.replace(/\B(?=(\d{3})+(?!\d))/g, "."); // Thêm dấu chấm
-};
-const ACTIVITY_TYPES = {
-  fuel: { label: 'Đổ xăng', icon: IconFuel, color: 'text-blue-500', bgColor: 'bg-blue-100' },
-  maintenance: { label: 'Bảo dưỡng', icon: IconSettings, color: 'text-green-500', bgColor: 'bg-green-100' },
-  repair: { label: 'Sửa chữa', icon: IconWrench, color: 'text-red-500', bgColor: 'bg-red-100' },
-};
-
-const formatNum = (val) => {
-  if (!val && val !== 0) return "";
-  return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 };
 
 const parseNum = (str) => {
   if (!str) return 0;
   return Number(str.toString().replace(/\./g, ""));
 };
+
 export default function App() {
-  const [activeTab, setActiveTab] = useState('dashboard');
-  
-  // Quản lý xe
-  const [vehicles, setVehicles] = useState(() => {
-    const saved = localStorage.getItem('moto_vehicles');
-    return saved ? JSON.parse(saved) : [
-      { id: 'v1', name: 'Xe của tôi', nextOilChange: 2000, imageUrl: 'https://images.unsplash.com/photo-1558981403-c5f91cbba527?auto=format&fit=crop&w=800&q=80' }
-    ];
-  });
-  
-  export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const fileInputRef = useRef(null);
 
@@ -230,9 +208,6 @@ export default function App() {
         <button onClick={() => setActiveTab('add')} className="bg-blue-600 p-4 rounded-full -mt-12 text-white shadow-lg"><IconPlus /></button>
         <button onClick={() => setActiveTab('history')} className={activeTab === 'history' ? 'text-blue-600' : 'text-slate-300'}><IconHistory /></button>
       </nav>
-    </div>
-  );
-}
     </div>
   );
 }
