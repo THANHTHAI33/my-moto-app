@@ -9,7 +9,8 @@ const IconHistory = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" hei
 const IconPlus = () => <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14m-7-7v14"/></svg>;
 const IconCamera = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>;
 const IconBell = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>;
-
+// --- HƯỚNG DẪN KẾT NỐI GOOGLE SHEETS ---
+const GOOGLE_SHEET_API_URL = "https://docs.google.com/spreadsheets/d/1yff0ze6QS-58A5pHouJCtU2Uu9wl8hcuLHBwBnXde_0/edit?gid=0#gid=0"; 
 const ACTIVITY_TYPES = {
   fuel: { label: 'Đổ xăng', icon: IconFuel, color: 'text-blue-500', bgColor: 'bg-blue-100' },
   maintenance: { label: 'Bảo dưỡng', icon: IconSettings, color: 'text-green-500', bgColor: 'bg-green-100' },
