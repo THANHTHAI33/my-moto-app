@@ -1,3 +1,26 @@
-
-<script type="module" src="/src/main.jsx"></script>
-<div id="root"></div>
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>MotoLog - Nhật Ký Xe Máy</title>
+    
+    <!-- Dòng này sẽ nạp Tailwind CSS để làm đẹp giao diện -->
+    <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
+    
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: #f8fafc; /* bg-slate-50 */
+      }
+      /* Ẩn thanh cuộn */
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
