@@ -12,15 +12,14 @@ const IconBell = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height
 const IconCloud = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.5 19a5.5 5.5 0 0 0 2.5-10.5 8.5 8.5 0 1 0-15.5 1.5A7 7 0 1 0 5 20h11.5"/></svg>;
 const IconChevronDown = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>;
 const IconChevronRight = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>;
-const IconTrash = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>;
 
 const ACTIVITY_TYPES = {
-  fuel: { label: 'Đổ xăng', icon: IconFuel, color: 'text-blue-700', bgColor: 'bg-blue-100' },
+  fuel: { label: 'Đổ xăng', icon: IconFuel, color: 'text-blue-500', bgColor: 'bg-blue-100' },
   maintenance: { label: 'Bảo dưỡng', icon: IconSettings, color: 'text-green-500', bgColor: 'bg-green-100' },
   repair: { label: 'Sửa chữa', icon: IconWrench, color: 'text-red-500', bgColor: 'bg-red-100' },
 };
 
-const FUEL_TYPES = ["RON 95-V", "RON 95-III", "E5 RON 92", "RON E97"];
+const FUEL_TYPES = ["RON 95-V", "RON 95-III", "E5 RON 92", "Dầu Diesel"];
 
 const formatNum = (val) => {
   if (val === null || val === undefined || val === "") return "0";
@@ -38,7 +37,7 @@ const DEFAULT_VEHICLE = {
   id: 'v1',
   name: "Xe của tôi",
   img: "https://images.unsplash.com/photo-1558981403-c5f91cbba527?w=800",
-  oilInterval: 3000,
+  oilInterval: 2000,
   lastOilOdo: 0
 };
 
@@ -46,10 +45,10 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isSyncing, setIsSyncing] = useState(false);
   const [showVehiclePicker, setShowVehiclePicker] = useState(false);
-  const [expandedMonth, setExpandedMonth] = useState(null); // Quản lý tháng nào đang được mở chi tiết
+  const [expandedMonth, setExpandedMonth] = useState(null);
   const fileInputRef = useRef(null);
 
-  // --- QUẢN LÝ DỮ LIỆU ---
+  // Dữ liệu xe
   const [vehicles, setVehicles] = useState(() => {
     const saved = localStorage.getItem('moto_v4_vehicles');
     return saved ? JSON.parse(saved) : [DEFAULT_VEHICLE];
@@ -65,6 +64,7 @@ export default function App() {
     [vehicles, currentVehicleId]
   );
 
+  // Cấu hình đồng bộ
   const [settings, setSettings] = useState(() => {
     const saved = localStorage.getItem('moto_v4_settings');
     return saved ? JSON.parse(saved) : { sheetUrl: "", isCloudSyncEnabled: false };
@@ -82,7 +82,6 @@ export default function App() {
     localStorage.setItem('moto_v4_current_vid', currentVehicleId);
   }, [vehicles, records, settings, currentVehicleId]);
 
-  // --- TÍNH TOÁN THỐNG KÊ ---
   const stats = useMemo(() => {
     const vehicleRecords = records.filter(r => r.vehicleId === activeVehicle.id);
     const now = new Date();
@@ -103,7 +102,6 @@ export default function App() {
     const latestOdo = vehicleRecords.length > 0 ? Math.max(...vehicleRecords.map(r => Number(r.odo) || 0)) : 0;
     const nextOilChange = (Number(activeVehicle.lastOilOdo) || 0) + (Number(activeVehicle.oilInterval) || 0);
     
-    // Nhóm theo tháng để báo cáo
     const groupedByMonth = vehicleRecords.reduce((acc, r) => {
       const d = new Date(r.date);
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
@@ -127,6 +125,7 @@ export default function App() {
     note: ''
   });
 
+  // Hàm gửi dữ liệu lên Google Sheets
   const syncToCloud = async (data) => {
     if (!settings.sheetUrl || !settings.isCloudSyncEnabled) return;
     setIsSyncing(true);
@@ -138,7 +137,7 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-    } catch (err) { console.error(err); } 
+    } catch (err) { console.error("Lỗi đồng bộ:", err); } 
     finally { setIsSyncing(false); }
   };
 
@@ -176,9 +175,11 @@ export default function App() {
 
     setRecords([newRecord, ...records]);
     setFormData({ ...formData, odo: '', cost: '', note: '' });
+    
+    // Gọi hàm đồng bộ sau khi lưu vào máy
     await syncToCloud(newRecord);
+    
     setActiveTab('history');
-    setExpandedMonth(`${new Date(newRecord.date).getFullYear()}-${String(new Date(newRecord.date).getMonth() + 1).padStart(2, '0')}`);
   };
 
   return (
@@ -187,10 +188,7 @@ export default function App() {
       <header className="bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-slate-100 p-4 flex justify-between items-center shadow-sm">
         <div className="flex items-center gap-3">
           <div className="relative">
-            <button 
-              onClick={() => setShowVehiclePicker(!showVehiclePicker)}
-              className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl transition-all"
-            >
+            <button onClick={() => setShowVehiclePicker(!showVehiclePicker)} className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl transition-all">
               <span className="text-xs font-black text-slate-700 uppercase">{activeVehicle.name}</span>
               <IconChevronDown />
             </button>
@@ -210,7 +208,12 @@ export default function App() {
         </div>
         <div className="flex items-center gap-2">
           {isSyncing && <div className="animate-spin text-blue-500"><IconCloud /></div>}
-          <button onClick={() => setActiveTab('settings')} className="p-2 text-slate-400 hover:text-blue-600 transition-colors"><IconSettings /></button>
+          <button 
+            onClick={() => setActiveTab('settings')} 
+            className={`p-2 rounded-xl transition-all ${activeTab === 'settings' ? 'bg-blue-50 text-blue-600' : 'text-slate-400 hover:text-blue-600'}`}
+          >
+            <IconSettings />
+          </button>
         </div>
       </header>
 
@@ -264,11 +267,14 @@ export default function App() {
           <form onSubmit={handleSubmit} className="bg-white p-6 rounded-[2.5rem] shadow-xl border border-slate-100 space-y-5 animate-in slide-in-from-bottom duration-300">
             <h2 className="text-center font-black uppercase text-slate-800 tracking-tighter italic text-xl">Thêm ghi chép</h2>
             <div className="grid grid-cols-3 gap-2">
-              {Object.entries(ACTIVITY_TYPES).map(([key, info]) => (
-                <button type="button" key={key} onClick={() => setFormData({...formData, type: key})} className={`flex flex-col items-center p-4 rounded-3xl border-2 transition-all ${formData.type === key ? 'border-blue-600 bg-blue-50 text-blue-600' : 'border-slate-50 bg-slate-50 text-slate-400'}`}>
-                  <info.icon /><span className="text-[10px] mt-2 font-black uppercase">{info.label}</span>
-                </button>
-              ))}
+              {Object.entries(ACTIVITY_TYPES).map(([key, info]) => {
+                const Icon = info.icon;
+                return (
+                  <button type="button" key={key} onClick={() => setFormData({...formData, type: key})} className={`flex flex-col items-center p-4 rounded-3xl border-2 transition-all ${formData.type === key ? 'border-blue-600 bg-blue-50 text-blue-600' : 'border-slate-50 bg-slate-50 text-slate-400'}`}>
+                    <Icon /><span className="text-[10px] mt-2 font-black uppercase">{info.label}</span>
+                  </button>
+                );
+              })}
             </div>
             {formData.type === 'fuel' && (
               <div className="grid grid-cols-2 gap-2">
@@ -297,98 +303,111 @@ export default function App() {
           </form>
         )}
 
-        {/* TAB HISTORY / REPORT THEO THÁNG */}
+        {/* TAB HISTORY */}
         {activeTab === 'history' && (
-          <div className="space-y-4 animate-in fade-in duration-500">
-            <div className="px-2">
-              <h3 className="font-black text-slate-400 text-[10px] uppercase tracking-widest mb-4">Báo cáo chi tiêu theo tháng</h3>
-              
-              {stats.sortedMonths.length === 0 ? (
-                <div className="text-center py-20 bg-white rounded-[2rem] border border-dashed border-slate-200">
-                  <p className="font-black italic uppercase text-xs text-slate-300">Chưa có dữ liệu</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {stats.sortedMonths.map(group => (
-                    <div key={group.key} className="bg-white rounded-[2rem] border border-slate-100 overflow-hidden shadow-sm transition-all">
-                      {/* Tiêu đề tháng (Nhấn để mở rộng) */}
-                      <button 
-                        onClick={() => setExpandedMonth(expandedMonth === group.key ? null : group.key)}
-                        className={`w-full flex justify-between items-center p-6 text-left transition-colors ${expandedMonth === group.key ? 'bg-slate-50' : 'hover:bg-slate-50/50'}`}
-                      >
-                        <div>
-                          <p className="text-[10px] font-black text-blue-500 uppercase tracking-widest">Tháng {group.key.split('-')[1]} năm {group.key.split('-')[0]}</p>
-                          <p className="text-lg font-black text-slate-800">{formatNum(group.total)} đ</p>
+          <div className="space-y-4">
+             <h3 className="px-2 font-black text-slate-400 text-[10px] uppercase tracking-widest">Báo cáo theo tháng</h3>
+             {stats.sortedMonths.map(group => (
+              <div key={group.key} className="bg-white rounded-[2rem] border border-slate-100 overflow-hidden shadow-sm">
+                <button onClick={() => setExpandedMonth(expandedMonth === group.key ? null : group.key)} className="w-full flex justify-between items-center p-6 text-left">
+                  <div>
+                    <p className="text-[10px] font-black text-blue-500 uppercase">Tháng {group.key.split('-')[1]} - {group.key.split('-')[0]}</p>
+                    <p className="text-lg font-black">{formatNum(group.total)} đ</p>
+                  </div>
+                  <IconChevronRight />
+                </button>
+                {expandedMonth === group.key && (
+                  <div className="px-6 pb-6 space-y-4">
+                    {group.items.map(r => {
+                      const Icon = ACTIVITY_TYPES[r.type].icon;
+                      return (
+                        <div key={r.id} className="flex items-center gap-4">
+                          <div className={`p-2 rounded-xl ${ACTIVITY_TYPES[r.type].bgColor} ${ACTIVITY_TYPES[r.type].color}`}><Icon /></div>
+                          <div className="flex-1">
+                            <div className="flex justify-between font-black text-xs"><span>{ACTIVITY_TYPES[r.type].label}</span><span>{formatNum(r.cost)} đ</span></div>
+                            <p className="text-[10px] text-slate-400">{r.date} - {formatNum(r.odo)} KM</p>
+                          </div>
                         </div>
-                        <div className={`p-2 rounded-xl bg-white border border-slate-100 transition-transform duration-300 ${expandedMonth === group.key ? 'rotate-90 text-blue-600 border-blue-100' : 'text-slate-300'}`}>
-                          <IconChevronRight />
-                        </div>
-                      </button>
-
-                      {/* Danh sách chi tiết trong tháng */}
-                      {expandedMonth === group.key && (
-                        <div className="px-6 pb-6 pt-2 space-y-4 border-t border-slate-50 animate-in slide-in-from-top-2 duration-300">
-                          {group.items.sort((a,b) => b.date.localeCompare(a.date)).map(r => {
-                            const Icon = ACTIVITY_TYPES[r.type].icon;
-                            return (
-                              <div key={r.id} className="flex items-center gap-4 relative group">
-                                <div className={`p-2.5 rounded-xl ${ACTIVITY_TYPES[r.type].bgColor} ${ACTIVITY_TYPES[r.type].color}`}>
-                                  <Icon />
-                                </div>
-                                <div className="flex-1">
-                                  <div className="flex justify-between">
-                                    <span className="font-black text-slate-800 text-[13px]">
-                                      {ACTIVITY_TYPES[r.type].label}
-                                      {r.type === 'fuel' && <span className="ml-1 text-[10px] text-blue-500">({r.fuelType})</span>}
-                                    </span>
-                                    <span className="font-black text-slate-900 text-sm">{formatNum(r.cost)} đ</span>
-                                  </div>
-                                  <div className="flex justify-between items-end mt-0.5">
-                                    <p className="text-[10px] font-bold text-slate-400">Ngày {r.date.split('-')[2]} • {formatNum(r.odo)} KM</p>
-                                    <button 
-                                      onClick={() => { if(confirm("Xóa mục này?")) setRecords(records.filter(rec => rec.id !== r.id)); }} 
-                                      className="text-[10px] text-red-400 font-black opacity-0 group-hover:opacity-100 transition-opacity uppercase"
-                                    >
-                                      Xóa
-                                    </button>
-                                  </div>
-                                  {r.note && <p className="text-[10px] text-slate-500 mt-1 italic leading-tight">"{r.note}"</p>}
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+             ))}
           </div>
         )}
 
         {/* TAB SETTINGS */}
         {activeTab === 'settings' && (
-          <div className="space-y-4 animate-in fade-in duration-300">
-            <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 space-y-6">
-              <h2 className="text-lg font-black text-slate-800 uppercase italic">Cấu hình: {activeVehicle.name}</h2>
-              <div className="space-y-4">
+          <div className="space-y-6 animate-in slide-in-from-right duration-300">
+            <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 space-y-4">
+              <h2 className="text-sm font-black text-slate-800 uppercase italic">Thông số xe</h2>
+              <div>
+                <label className="text-[10px] font-black text-slate-400 uppercase ml-4 mb-1 block">Tên xe</label>
+                <input type="text" value={activeVehicle.name} onChange={e => updateActiveVehicle({ name: e.target.value })} className="w-full bg-slate-50 p-4 rounded-2xl font-bold outline-none" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[10px] font-black text-slate-400 uppercase ml-4 mb-1 block">Tên hiển thị</label>
-                  <input type="text" value={activeVehicle.name} onChange={e => updateActiveVehicle({ name: e.target.value })} className="w-full bg-slate-50 p-4 rounded-2xl font-bold outline-none border border-transparent focus:border-slate-200" />
+                  <label className="text-[10px] font-black text-slate-400 uppercase ml-4 mb-1 block">Thay nhớt mỗi (KM)</label>
+                  <input type="text" value={formatNum(activeVehicle.oilInterval)} onChange={e => updateActiveVehicle({ oilInterval: parseNum(e.target.value) })} className="w-full bg-slate-50 p-4 rounded-2xl font-black text-blue-600" />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-[10px] font-black text-slate-400 uppercase ml-4 mb-1 block">Thay nhớt mỗi (KM)</label>
-                    <input type="text" value={formatNum(activeVehicle.oilInterval)} onChange={e => updateActiveVehicle({ oilInterval: parseNum(e.target.value) })} className="w-full bg-slate-50 p-4 rounded-2xl font-black text-blue-600 outline-none" />
-                  </div>
-                  <div>
-                    <label className="text-[10px] font-black text-slate-400 uppercase ml-4 mb-1 block">Thay lần cuối tại</label>
-                    <input type="text" value={formatNum(activeVehicle.lastOilOdo)} onChange={e => updateActiveVehicle({ lastOilOdo: parseNum(e.target.value) })} className="w-full bg-slate-50 p-4 rounded-2xl font-black text-emerald-600 outline-none" />
-                  </div>
+                <div>
+                  <label className="text-[10px] font-black text-slate-400 uppercase ml-4 mb-1 block">Lần cuối tại (KM)</label>
+                  <input type="text" value={formatNum(activeVehicle.lastOilOdo)} onChange={e => updateActiveVehicle({ lastOilOdo: parseNum(e.target.value) })} className="w-full bg-slate-50 p-4 rounded-2xl font-black text-emerald-600" />
                 </div>
               </div>
             </div>
+
+            <div className="bg-slate-900 p-6 rounded-[2.5rem] shadow-xl space-y-4">
+              <div className="flex items-center gap-3 text-white">
+                <IconCloud />
+                <h2 className="text-sm font-black uppercase italic tracking-wider">Đồng bộ Google Sheets</h2>
+              </div>
+              
+              <div className="space-y-3">
+                <div>
+                  <label className="text-[10px] font-black text-slate-400 uppercase ml-4 mb-1 block">App Script URL</label>
+                  <input 
+                    type="text" 
+                    placeholder="Dán link script tại đây..." 
+                    value={settings.sheetUrl} 
+                    onChange={e => setSettings({...settings, sheetUrl: e.target.value})} 
+                    className="w-full bg-white/10 p-4 rounded-2xl font-medium text-white text-xs outline-none border border-white/10 focus:border-blue-500 transition-all"
+                  />
+                  <p className="text-[9px] text-slate-500 mt-2 ml-4">Link nhận được sau khi nhấn 'Deploy' trên Google Apps Script.</p>
+                </div>
+
+                <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
+                  <div>
+                    <p className="text-[10px] font-black text-slate-300 uppercase">Trạng thái đồng bộ</p>
+                    <p className={`text-[11px] font-bold ${settings.isCloudSyncEnabled ? 'text-blue-400' : 'text-slate-500'}`}>
+                      {settings.isCloudSyncEnabled ? 'Đang kích hoạt' : 'Đang tắt'}
+                    </p>
+                  </div>
+                  <button 
+                    onClick={() => setSettings({...settings, isCloudSyncEnabled: !settings.isCloudSyncEnabled})} 
+                    className={`w-14 h-7 rounded-full transition-all relative ${settings.isCloudSyncEnabled ? 'bg-blue-600' : 'bg-slate-700'}`}
+                  >
+                    <div className={`absolute top-1 w-5 h-5 bg-white rounded-full transition-all shadow-lg ${settings.isCloudSyncEnabled ? 'right-1' : 'left-1'}`} />
+                  </button>
+                </div>
+              </div>
+
+              {settings.sheetUrl && settings.isCloudSyncEnabled && (
+                <div className="p-3 bg-blue-500/10 rounded-xl border border-blue-500/20">
+                  <p className="text-[10px] text-blue-400 text-center font-bold italic">
+                    Dữ liệu sẽ được tự động gửi lên Sheet sau mỗi lần bạn nhấn "Lưu hoạt động".
+                  </p>
+                </div>
+              )}
+            </div>
+            
+            <button 
+              onClick={() => { if(confirm("Xóa toàn bộ dữ liệu trên máy?")) setRecords([]); }} 
+              className="w-full py-4 text-[10px] font-black text-red-400 uppercase tracking-widest hover:bg-red-50 rounded-2xl transition-all"
+            >
+              Xóa lịch sử ứng dụng
+            </button>
           </div>
         )}
       </main>
@@ -396,9 +415,9 @@ export default function App() {
       {/* BOTTOM NAV */}
       <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md bg-white/90 backdrop-blur-xl border border-white shadow-2xl p-3 rounded-[2.5rem] z-50">
         <div className="flex justify-around items-center">
-          <button onClick={() => setActiveTab('dashboard')} className={`p-3 rounded-2xl transition-all ${activeTab === 'dashboard' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:text-slate-400'}`}><IconDashboard /></button>
+          <button onClick={() => setActiveTab('dashboard')} className={`p-3 rounded-2xl transition-all ${activeTab === 'dashboard' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-300 hover:text-slate-400'}`}><IconDashboard /></button>
           <button onClick={() => setActiveTab('add')} className={`p-5 rounded-full -mt-16 border-8 border-slate-50 shadow-2xl transition-all ${activeTab === 'add' ? 'bg-slate-900 rotate-45' : 'bg-blue-600 shadow-blue-300'} text-white`}><IconPlus /></button>
-          <button onClick={() => setActiveTab('history')} className={`p-3 rounded-2xl transition-all ${activeTab === 'history' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:text-slate-400'}`}><IconHistory /></button>
+          <button onClick={() => setActiveTab('history')} className={`p-3 rounded-2xl transition-all ${activeTab === 'history' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-300 hover:text-slate-400'}`}><IconHistory /></button>
         </div>
       </nav>
     </div>
