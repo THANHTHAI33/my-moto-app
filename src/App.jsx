@@ -20,7 +20,7 @@ const ACTIVITY_TYPES = {
   repair: { label: 'Sửa chữa', icon: IconWrench, color: 'text-red-500', bgColor: 'bg-red-100' },
 };
 
-const FUEL_TYPES = ["RON 95-V", "RON 95-III", "E5 RON 92", "Dầu Diesel"];
+const FUEL_TYPES = ["RON 95-V", "RON 95-III", "E5 RON 92", "RON E97"];
 
 const formatNum = (val) => {
   if (val === null || val === undefined || val === "") return "0";
