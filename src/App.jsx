@@ -38,7 +38,7 @@ const DEFAULT_VEHICLE = {
   id: 'v1',
   name: "Xe của tôi",
   img: "https://images.unsplash.com/photo-1558981403-c5f91cbba527?w=800",
-  oilInterval: 2000,
+  oilInterval: 3000,
   lastOilOdo: 0
 };
 
